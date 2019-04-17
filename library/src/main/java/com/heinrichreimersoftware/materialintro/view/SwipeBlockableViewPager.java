@@ -27,11 +27,14 @@ package com.heinrichreimersoftware.materialintro.view;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import androidx.viewpager.widget.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 public class SwipeBlockableViewPager extends ViewPager {
+
+    private static final String TAG = "SwipeBlockableViewPager";
 
     private static final int SWIPE_LOCK_THRESHOLD = 0;
     private static final int SWIPE_UNLOCK_THRESHOLD = 0;
@@ -69,12 +72,24 @@ public class SwipeBlockableViewPager extends ViewPager {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return handleTouchEvent(event) && super.onTouchEvent(event);
+        // See among others https://github.com/chrisbanes/PhotoView/issues/31
+        try {
+            return handleTouchEvent(event) && super.onTouchEvent(event);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Caught error during onTouchEvent", e);
+            return false;
+        }
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return handleTouchEvent(event) && super.onInterceptTouchEvent(event);
+        // See among others https://github.com/chrisbanes/PhotoView/issues/31
+        try {
+            return handleTouchEvent(event) && super.onInterceptTouchEvent(event);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Caught error during onInterceptTouchEvent", e);
+            return false;
+        }
     }
 
     private boolean handleTouchEvent(MotionEvent event) {
@@ -127,13 +142,7 @@ public class SwipeBlockableViewPager extends ViewPager {
                 break;
             }
 
-            case MotionEvent.ACTION_UP: {
-                activePointerId = INVALID_POINTER_ID;
-                lockedLeft = false;
-                lockedRight = false;
-                break;
-            }
-
+            case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
                 activePointerId = INVALID_POINTER_ID;
                 lockedLeft = false;
